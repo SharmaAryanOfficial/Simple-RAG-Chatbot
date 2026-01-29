@@ -14,14 +14,21 @@ load_dotenv()
 GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 
 template = """
+You are a helpful assistant.
 
+Use the following context ONLY if it is relevant to the user's question.
+If the context is not relevant, answer normally.
 
 Context:
 {context}
 
 Conversation History:
 {message_history}
+
+User Question:
+{question}
 """
+
 
 
 def chat(state: ChatAgentState) -> ChatAgentState:
@@ -34,11 +41,7 @@ def chat(state: ChatAgentState) -> ChatAgentState:
         api_key=GROQ_API_KEY
     )
 
-    model = model.bind_tools([
-        get_current_date_and_time,
-        search_the_web
-    ])
-
+    state["messages"] = state["messages"][-4:]
     # Extract latest user message
     last_message = state["messages"][-1].content
 
@@ -48,7 +51,14 @@ def chat(state: ChatAgentState) -> ChatAgentState:
     chain = prompt_template | model
 
     answer = chain.invoke({
-        "message_history": state["messages"],
-        "context": context
+    "message_history": state["messages"],
+    "context": context,
+    "question": last_message
     })
+
+
+    state["messages"].append(answer)
+    return state
+
+
 

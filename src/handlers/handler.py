@@ -21,32 +21,22 @@ def chat_agent_handler(thread_id: str, message : str) -> ChatAgentState:
         }
     ) #{'messages': answer from AI}
 
-def chat_streaming_handler(thread_id : str, message : str) -> Iterator[str]:
-    """
-    Docstring for chat_streaming_handler
-    
-    :param thread_id: Description
-    :type thread_id: str
-    :param message: Description
-    :type message: str
-    :return: Description
-    :rtype: Any
-    """
+def chat_streaming_handler(thread_id: str, message: str):
     graph = create_chat_agent_graph()
 
+    state = ChatAgentState(
+        thread_id=thread_id,
+        messages=[HumanMessage(content=message)]
+    )
 
-    for chunk, metadata in graph.stream(
-        input={
-            'messages': [HumanMessage(content=message)]
-        },
-        config={
-            'configurable':{
-                'thread_id':thread_id
-            }
-        },
-        stream_mode='messages'
-    ):
-        yield chunk.content
+    result = graph.invoke(
+    state,
+    config={"configurable": {"thread_id": thread_id}}
+)
+
+    # ✅ stream ONLY the final AI answer
+    final_answer = result["messages"][-1].content
+    yield final_answer
 
 
 
