@@ -1,0 +1,20 @@
+# virtual environment
+venv/
+
+# python cache
+__pycache__/
+*.pyc
+
+# env
+.env
+
+# RAG data
+data/faiss_index/
+data/uploads/
+
+# streamlit
+.streamlit/
+
+# OS junk
+.DS_Store
+Thumbs.db
